@@ -1,13 +1,44 @@
+import { BusinessError } from '@/common/business-error';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailDataRequired } from '@sendgrid/helpers/classes/mail';
 import sendgrid from '@sendgrid/mail';
-import { BusinessError } from 'nest-common';
+
+export interface EmailOptions {
+	to: string;
+	subject: string;
+	html: string;
+	from?: {
+		email: string;
+		name: string;
+	};
+}
 
 @Injectable()
-export class EmailService {
+export class SendgridEmailService {
 	constructor(private readonly config: ConfigService) {
 		sendgrid.setApiKey(this.config.get('SENDGRID_API_KEY'));
+	}
+
+	async sendEmail(options: EmailOptions): Promise<void> {
+		const defaultFrom = {
+			email: 'noreply@mayavee.ai',
+			name: 'Mayavee',
+		};
+
+		const mail: MailDataRequired = {
+			to: options.to,
+			from: options.from || defaultFrom,
+			subject: options.subject,
+			html: options.html,
+		};
+
+		try {
+			await sendgrid.send(mail);
+		} catch (error) {
+			console.log({ error });
+			throw new BusinessError('INTERNAL_SERVER_ERROR', 'Failed to send email');
+		}
 	}
 
 	async sendPasswordResetEmail(recipient: string, token: string) {

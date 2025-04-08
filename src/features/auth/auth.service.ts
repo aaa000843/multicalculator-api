@@ -6,7 +6,7 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { EmailService } from '../mail/email.service';
+import { SendgridEmailService } from '../mail/sendgrid-email.service';
 import { User, UserDocument } from '../user/user.schema';
 import { JwtService } from '@nestjs/jwt';
 import { BusinessError } from '@/common/business-error';
@@ -15,7 +15,7 @@ import { BusinessError } from '@/common/business-error';
 export class AuthService {
 	constructor(
 		@InjectModel(User.name) private userModel: Model<UserDocument>,
-		private mailService: EmailService,
+		private mailService: SendgridEmailService,
 		private jwtService: JwtService,
 	) {}
 
